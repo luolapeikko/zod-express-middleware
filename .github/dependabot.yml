@@ -6,6 +6,5 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
-      - dependency-name: "@types/*"
+        dependency-type: "production"
         update-types: ["version-update:semver-patch"]
