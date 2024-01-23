@@ -5,6 +5,5 @@ updates:
     schedule:
       interval: "weekly"
     allow:
-      - dependency-type: "production"
       - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
+        dependency-type: "production"
