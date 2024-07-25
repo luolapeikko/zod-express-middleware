@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Get Npm Package Env Variables
-        run: bash ../bin/package-envs.sh >> $GITHUB_ENV
+        run: bash ./bin/package-envs.sh >> $GITHUB_ENV
 
       - uses: pnpm/action-setup@v4
         if: env.NPM == 'pnpm'
