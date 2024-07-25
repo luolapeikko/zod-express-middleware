@@ -5,10 +5,15 @@ import {errorMiddleWare, okResponseHandler, startExpress, stopExpress} from './e
 import fetch from 'cross-fetch';
 import {validateRequest} from './validateRequest';
 import {z} from 'zod';
-import {ZodMiddlewareObject} from './validationTypes';
+import {type ZodMiddlewareObject} from './validationTypes';
 
 const headers = {'Content-Type': 'application/json'};
 const url = 'http://localhost:8936';
+
+enum NativeEnum {
+	TRUE = 'true',
+	FALSE = 'false',
+}
 
 const stringBody = {
 	body: z.string(),
@@ -23,12 +28,16 @@ const objectBody = {
 const queryParams = {
 	query: z.object({
 		id: z.string(),
+		enum: z.enum(['true', 'false']).optional(),
+		nenum: z.nativeEnum(NativeEnum).optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
 const paramParams = {
 	params: z.object({
 		id: z.string(),
+		enum: z.enum(['true', 'false']).optional(),
+		nenum: z.nativeEnum(NativeEnum).optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 

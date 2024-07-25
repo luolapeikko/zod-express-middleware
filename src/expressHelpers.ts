@@ -1,5 +1,5 @@
-import Express, {Application, ErrorRequestHandler, RequestHandler} from 'express';
-import {Server} from 'http';
+import Express, {type Application, type ErrorRequestHandler, type RequestHandler} from 'express';
+import {type Server} from 'http';
 import {z} from 'zod';
 
 function printIssue(issue: z.ZodIssue): string {
@@ -15,15 +15,11 @@ const app = Express();
 
 let server: undefined | Server;
 export async function startExpress(port: string | number): Promise<Application> {
-	return new Promise((resolve, reject) => {
-		if (!app) {
-			reject(new Error('no express instance found'));
-		} else {
-			server = app.listen(port, () => {
-				app.use(Express.json());
-				resolve(app);
-			});
-		}
+	return new Promise((resolve) => {
+		server = app.listen(port, () => {
+			app.use(Express.json());
+			resolve(app);
+		});
 	});
 }
 

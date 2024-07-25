@@ -2,11 +2,15 @@
 import type {Request, RequestHandler} from 'express';
 import type {ParamsDictionary} from 'express-serve-static-core';
 import type {ParsedQs} from 'qs';
-import {z} from 'zod';
+import {type z} from 'zod';
 
 type ZodSchemaBodyType = z.ZodTypeAny;
-type ZodSchemaParamsType = z.ZodObject<Record<string, z.ZodString | z.ZodOptional<z.ZodString>>>;
-type ZodSchemaQueryType = z.ZodObject<Record<string, z.ZodString | z.ZodOptional<z.ZodString>>>;
+
+type ParamsBaseType = z.ZodString | z.ZodEnum<[string, ...string[]]> | z.ZodNativeEnum<any>;
+type ZodSchemaParamsType = z.ZodObject<Record<string, ParamsBaseType | z.ZodOptional<ParamsBaseType>>>;
+
+type ValidQueryBaseType = z.ZodString | z.ZodEnum<[string, ...string[]]> | z.ZodNativeEnum<any>;
+type ZodSchemaQueryType = z.ZodObject<Record<string, ValidQueryBaseType | z.ZodOptional<ValidQueryBaseType>>>;
 
 export type ZodParamsType<T extends ZodSchemaParamsType | undefined> = T extends ZodSchemaParamsType ? z.infer<T> : ParamsDictionary;
 export type ZodBodyType<T extends ZodSchemaBodyType | undefined> = T extends ZodSchemaBodyType ? z.infer<T> : unknown;
@@ -72,3 +76,10 @@ export type ZodInferRequest<T extends ZodMiddlewareObject, ResBody = any, Locals
 	ZodQueryType<T['query']>,
 	Locals
 >;
+
+/**
+ * Express Resolvers for ZodMiddlewareObject
+ */
+export type ResolveZodParams<Z extends ZodMiddlewareObject> = Z['params'] extends ZodSchemaParamsType ? z.infer<Z['params']> : ParamsDictionary;
+export type ResolveZodBody<Z extends ZodMiddlewareObject> = Z['body'] extends ZodSchemaBodyType ? z.infer<Z['body']> : unknown;
+export type ResolveZodQuery<Z extends ZodMiddlewareObject> = Z['query'] extends ZodSchemaQueryType ? z.infer<Z['query']> : ParsedQs;
