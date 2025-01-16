@@ -10,6 +10,14 @@ import {type ZodMiddlewareObject} from './validationTypes';
 const headers = {'Content-Type': 'application/json'};
 const url = 'http://localhost:8936';
 
+export type UUID = `${string}-${string}-${string}-${string}-${string}`;
+
+export function isUUID(value: string): value is UUID {
+	return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+export const uuidSchema = z.string().refine<UUID>(isUUID).brand('uuid');
+
 enum NativeEnum {
 	TRUE = 'true',
 	FALSE = 'false',
@@ -35,6 +43,7 @@ const queryParams = {
 			.string()
 			.refine<'true'>((v) => v === 'true')
 			.optional(),
+		uuidSchema: uuidSchema.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
@@ -48,6 +57,7 @@ const paramParams = {
 			.string()
 			.refine<'true'>((v) => v === 'true')
 			.optional(),
+		uuidSchema: uuidSchema.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 

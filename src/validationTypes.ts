@@ -6,20 +6,12 @@ import {type z} from 'zod';
 
 type ZodSchemaBodyType = z.ZodTypeAny;
 
-type ParamsBaseType<T extends string = string> =
-	| z.ZodString
-	| z.ZodBranded<z.ZodString, T>
-	| z.ZodEffects<z.ZodString, T, string>
-	| z.ZodEnum<[T, ...T[]]>
-	| z.ZodNativeEnum<any>;
+type AnyZodString<T extends string = string> = z.ZodString | z.ZodBranded<AnyZodString<T>, any> | z.ZodEffects<AnyZodString<T>, T, string>;
+
+type ParamsBaseType<T extends string = string> = AnyZodString | z.ZodEnum<[T, ...T[]]> | z.ZodNativeEnum<any>;
 type ZodSchemaParamsType = z.ZodObject<Record<string, ParamsBaseType | z.ZodOptional<ParamsBaseType>>>;
 
-type ValidQueryBaseType<T extends string = string> =
-	| z.ZodString
-	| z.ZodBranded<z.ZodString, T>
-	| z.ZodEffects<z.ZodString, T, string>
-	| z.ZodEnum<[T, ...T[]]>
-	| z.ZodNativeEnum<any>;
+type ValidQueryBaseType<T extends string = string> = AnyZodString | z.ZodEnum<[T, ...T[]]> | z.ZodNativeEnum<any>;
 type ZodSchemaQueryType = z.ZodObject<Record<string, ValidQueryBaseType | z.ZodOptional<ValidQueryBaseType>>>;
 
 export type ZodParamsType<T extends ZodSchemaParamsType | undefined> = T extends ZodSchemaParamsType ? z.infer<T> : ParamsDictionary;
