@@ -21,23 +21,33 @@ const stringBody = {
 
 const objectBody = {
 	body: z.object({
-		data: z.string(),
+		data: z.string().brand('data'),
 	}),
 } satisfies ZodMiddlewareObject;
 
 const queryParams = {
 	query: z.object({
 		id: z.string(),
+		brand: z.string().brand('brand').optional(),
 		enum: z.enum(['true', 'false']).optional(),
 		nenum: z.nativeEnum(NativeEnum).optional(),
+		refine: z
+			.string()
+			.refine<'true'>((v) => v === 'true')
+			.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
 const paramParams = {
 	params: z.object({
 		id: z.string(),
+		brand: z.string().brand('brand').optional(),
 		enum: z.enum(['true', 'false']).optional(),
 		nenum: z.nativeEnum(NativeEnum).optional(),
+		refine: z
+			.string()
+			.refine<'true'>((v) => v === 'true')
+			.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
@@ -54,6 +64,7 @@ describe('zodErrorToString', function () {
 		app.post('/object', validateRequest(objectBody), okResponseHandler);
 		app.post('/query', validateRequest(queryParams), okResponseHandler);
 		app.post('/param', validateRequest(paramParams), okResponseHandler);
+		app.post('/param/:id', validateRequest(paramParams), okResponseHandler);
 		app.post('/param/:id', validateRequest(paramParams), okResponseHandler);
 		app.use(errorMiddleWare);
 	});
