@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {type ResolveZodBody, type ResolveZodParams, type ResolveZodQuery, type ZodMiddlewareObject} from './validationTypes';
 import {type RequestHandler} from 'express';
 import {z} from 'zod';
+import {type ResolveZodBody, type ResolveZodParams, type ResolveZodQuery, type ZodMiddlewareObject} from './validationTypes';
 
 export type ValidateOptions = {
 	/** Replace Request values with validated values */
@@ -43,7 +42,7 @@ export function validateRequest<Z extends ZodMiddlewareObject>(
 					req.body = status.data.body;
 				}
 				if (schema.params) {
-					req.params = status.data.params;
+					req.params = status.data.params as ResolveZodParams<Z>;
 				}
 				if (schema.query) {
 					req.query = status.data.query;

@@ -1,11 +1,7 @@
-/* eslint-disable sort-keys */
-import 'jest';
-import {describe, expect} from '@jest/globals';
-import {errorMiddleWare, okResponseHandler, startExpress, stopExpress} from './expressHelpers';
-import fetch from 'cross-fetch';
-import {validateRequest} from './validateRequest';
+import {afterAll, beforeAll, describe, expect, it} from 'vitest';
 import {z} from 'zod';
-import {type ZodMiddlewareObject} from './validationTypes';
+import {errorMiddleWare, okResponseHandler, startExpress, stopExpress} from './expressHelpers';
+import {validateRequest, type ZodMiddlewareObject} from '.';
 
 const headers = {'Content-Type': 'application/json'};
 const url = 'http://localhost:8936';

@@ -1,5 +1,5 @@
-import Express, {type Application, type ErrorRequestHandler, type RequestHandler} from 'express';
 import {type Server} from 'http';
+import Express, {type Application, type ErrorRequestHandler, type RequestHandler} from 'express';
 import {z} from 'zod';
 
 function printIssue(issue: z.ZodIssue): string {
@@ -42,6 +42,6 @@ export const errorMiddleWare: ErrorRequestHandler = (err, _req, res, next) => {
 	next();
 };
 
-export const okResponseHandler: RequestHandler = (req, res) => {
+export const okResponseHandler: RequestHandler = (_req, res) => {
 	res.status(200).send('OK');
 };

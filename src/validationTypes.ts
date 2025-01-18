@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {Request, RequestHandler} from 'express';
 import type {ParamsDictionary} from 'express-serve-static-core';
 import type {ParsedQs} from 'qs';
@@ -6,12 +5,35 @@ import {type z} from 'zod';
 
 type ZodSchemaBodyType = z.ZodTypeAny;
 
-type AnyZodString<T extends string = string> = z.ZodString | z.ZodBranded<AnyZodString<T>, any> | z.ZodEffects<AnyZodString<T>, T, string>;
+/**
+ * used as "root" effect type on Params and Query types (effect need to produce string output).
+ * @example
+ * const test: ZodStringEffect = z.date().transform((date) => date.getTime()).transform((time) => time.toString());
+ */
+type ZodStringEffect<T extends string = string> = z.ZodEffects<z.ZodTypeAny, T, any>;
 
-type ParamsBaseType<T extends string = string> = AnyZodString | z.ZodEnum<[T, ...T[]]> | z.ZodNativeEnum<any>;
-type ZodSchemaParamsType = z.ZodObject<Record<string, ParamsBaseType | z.ZodOptional<ParamsBaseType>>>;
+type AnyZodString<T extends string = string> = z.ZodString | z.ZodBranded<AnyZodString<T>, any> | ZodStringEffect<T>;
 
-type ValidQueryBaseType<T extends string = string> = AnyZodString | z.ZodEnum<[T, ...T[]]> | z.ZodNativeEnum<any>;
+type StrEnumLike = {
+	[x: string]: string;
+};
+
+type ZodNativeStrEnum<T extends StrEnumLike> = z.ZodType<T[keyof T], z.ZodNativeEnumDef<T>, T[keyof T]>;
+
+type ParamsBaseType<T extends string | StrEnumLike = string | StrEnumLike> = T extends StrEnumLike
+	? ZodNativeStrEnum<T>
+	: T extends string
+		? AnyZodString | z.ZodEnum<[T, ...T[]]>
+		: never;
+type ZodSchemaParamsType<T extends string | StrEnumLike = string | StrEnumLike> = z.ZodObject<
+	Record<string, ParamsBaseType<T> | z.ZodOptional<ParamsBaseType<T>>>
+>;
+
+type ValidQueryBaseType<T extends string | StrEnumLike = string | StrEnumLike> = T extends StrEnumLike
+	? ZodNativeStrEnum<T>
+	: T extends string
+		? AnyZodString | z.ZodEnum<[T, ...T[]]>
+		: never;
 type ZodSchemaQueryType = z.ZodObject<Record<string, ValidQueryBaseType | z.ZodOptional<ValidQueryBaseType>>>;
 
 export type ZodParamsType<T extends ZodSchemaParamsType | undefined> = T extends ZodSchemaParamsType ? z.infer<T> : ParamsDictionary;
