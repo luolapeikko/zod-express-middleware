@@ -48,6 +48,8 @@ const queryParams = {
 		sub1: sub1ValueSchema.optional(),
 		union: allSubValueSchema.optional(),
 		bunion: allSubValueBrandSchema.optional(),
+		literal: z.literal('test').optional(),
+		bliteral: z.literal('test').brand('test').optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
@@ -65,6 +67,8 @@ const paramParams = {
 		sub1: sub1ValueSchema.optional(),
 		union: allSubValueSchema.optional(),
 		bunion: allSubValueBrandSchema.optional(),
+		literal: z.literal('test').optional(),
+		bliteral: z.literal('test').brand('test').optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 

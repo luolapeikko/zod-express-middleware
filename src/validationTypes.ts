@@ -16,7 +16,7 @@ type StrEnumLike = {
  */
 type ZodStringEffect<T extends string = string> = z.ZodEffects<z.ZodTypeAny, T, any>;
 
-type AnyZodString<T extends string = string> = z.ZodString | z.ZodBranded<AnyZodString<T>, any> | ZodStringEffect<T>;
+type AnyZodString<T extends string = string> = z.ZodString | z.ZodLiteral<T> | z.ZodBranded<AnyZodString<T>, any> | ZodStringEffect<T>;
 
 type AnyEnum<T extends string> = z.ZodEnum<[T, ...T[]]> | z.ZodBranded<AnyEnum<T>, any>;
 
