@@ -6,6 +6,16 @@ import {validateRequest, type ZodMiddlewareObject} from '.';
 const headers = {'Content-Type': 'application/json'};
 const url = 'http://localhost:8936';
 
+enum NativeEnum {
+	TRUE = 'true',
+	FALSE = 'false',
+}
+
+const sub1ValueSchema = z.enum(['sub1_1', 'sub1_2']).brand('Sub1Brand');
+const sub2ValueSchema = z.enum(['sub2_1', 'sub2_2']).brand('Sub2Brand');
+const allSubValueSchema = z.union([sub1ValueSchema, sub2ValueSchema]);
+const allSubValueBrandSchema = z.union([sub1ValueSchema, sub2ValueSchema]).brand('AllSubBrand');
+
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
 export function isUUID(value: string): value is UUID {
@@ -13,11 +23,6 @@ export function isUUID(value: string): value is UUID {
 }
 
 export const uuidSchema = z.string().refine<UUID>(isUUID).brand('uuid');
-
-enum NativeEnum {
-	TRUE = 'true',
-	FALSE = 'false',
-}
 
 const stringBody = {
 	body: z.string(),
@@ -40,6 +45,9 @@ const queryParams = {
 			.refine<'true'>((v) => v === 'true')
 			.optional(),
 		uuidSchema: uuidSchema.optional(),
+		sub1: sub1ValueSchema.optional(),
+		union: allSubValueSchema.optional(),
+		bunion: allSubValueBrandSchema.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
@@ -54,6 +62,9 @@ const paramParams = {
 			.refine<'true'>((v) => v === 'true')
 			.optional(),
 		uuidSchema: uuidSchema.optional(),
+		sub1: sub1ValueSchema.optional(),
+		union: allSubValueSchema.optional(),
+		bunion: allSubValueBrandSchema.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 

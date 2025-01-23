@@ -5,6 +5,10 @@ import {type z} from 'zod';
 
 type ZodSchemaBodyType = z.ZodTypeAny;
 
+type StrEnumLike = {
+	[x: string]: string;
+};
+
 /**
  * used as "root" effect type on Params and Query types (effect need to produce string output).
  * @example
@@ -14,16 +18,18 @@ type ZodStringEffect<T extends string = string> = z.ZodEffects<z.ZodTypeAny, T, 
 
 type AnyZodString<T extends string = string> = z.ZodString | z.ZodBranded<AnyZodString<T>, any> | ZodStringEffect<T>;
 
-type StrEnumLike = {
-	[x: string]: string;
-};
+type AnyEnum<T extends string> = z.ZodEnum<[T, ...T[]]> | z.ZodBranded<AnyEnum<T>, any>;
 
-type ZodNativeStrEnum<T extends StrEnumLike> = z.ZodType<T[keyof T], z.ZodNativeEnumDef<T>, T[keyof T]>;
+type ZodStringBased<T extends string | StrEnumLike> = T extends string ? AnyZodString<T> | AnyEnum<T> : never;
+
+type AnyStringBasedUnion<T extends string> = z.ZodUnion<[ZodStringBased<T>, ...ZodStringBased<T>[]]> | z.ZodBranded<AnyStringBasedUnion<T>, any>;
+
+type ZodNativeStrEnum<T extends string | StrEnumLike> = T extends StrEnumLike ? z.ZodType<T[keyof T], z.ZodNativeEnumDef<T>, T[keyof T]> : never;
 
 type ParamsBaseType<T extends string | StrEnumLike = string | StrEnumLike> = T extends StrEnumLike
-	? ZodNativeStrEnum<T>
+	? ZodStringBased<T> | ZodNativeStrEnum<T>
 	: T extends string
-		? AnyZodString | z.ZodEnum<[T, ...T[]]>
+		? ZodNativeStrEnum<T> | ZodStringBased<T> | AnyStringBasedUnion<T>
 		: never;
 type ZodSchemaParamsType<T extends string | StrEnumLike = string | StrEnumLike> = z.ZodObject<
 	Record<string, ParamsBaseType<T> | z.ZodOptional<ParamsBaseType<T>>>
@@ -32,7 +38,7 @@ type ZodSchemaParamsType<T extends string | StrEnumLike = string | StrEnumLike> 
 type ValidQueryBaseType<T extends string | StrEnumLike = string | StrEnumLike> = T extends StrEnumLike
 	? ZodNativeStrEnum<T>
 	: T extends string
-		? AnyZodString | z.ZodEnum<[T, ...T[]]>
+		? ZodStringBased<T> | AnyStringBasedUnion<T>
 		: never;
 type ZodSchemaQueryType = z.ZodObject<Record<string, ValidQueryBaseType | z.ZodOptional<ValidQueryBaseType>>>;
 
