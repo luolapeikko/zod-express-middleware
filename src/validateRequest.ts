@@ -27,9 +27,9 @@ export function validateRequest<Z extends ZodMiddlewareObject>(
 	{replace}: ValidateOptions = {replace: false},
 ): RequestHandler<ResolveZodParams<Z>, any, ResolveZodBody<Z>, ResolveZodQuery<Z>> {
 	const validationObject = z.object({
-		body: schema.body || z.any(),
-		params: schema.params || z.record(z.string(), z.any()),
-		query: schema.query || z.record(z.string(), z.any()),
+		body: schema.body ?? z.any(),
+		params: schema.params ?? z.record(z.string(), z.any()),
+		query: schema.query ?? z.record(z.string(), z.any()),
 	});
 	return function (req, _res, next) {
 		const status = validationObject.safeParse(req);
