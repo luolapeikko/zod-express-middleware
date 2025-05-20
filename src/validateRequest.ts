@@ -12,7 +12,7 @@ export type ValidateOptions = {
  * @example
  * const demoRequestSchema = {
  *   body: z.object({
- * 	   hello: z.string(),
+ *     hello: z.string(),
  *   }),
  * } satisfies ZodMiddlewareObject;
  * type DemoRequestHandler = ZodInferRequestHandler<typeof demoRequestSchema>;
