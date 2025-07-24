@@ -17,7 +17,9 @@
 		"importHelpers": false,
 		"strictNullChecks": true,
 		"noUnusedLocals": true,
-		"strict": true
+		"strict": true,
+		"erasableSyntaxOnly": true,
+		"isolatedDeclarations": true
 	},
 	"typedocOptions": {
 		"entryPoints": ["src/index.ts"],

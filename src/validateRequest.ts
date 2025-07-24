@@ -1,6 +1,6 @@
 import {type RequestHandler} from 'express';
 import {z} from 'zod';
-import {type ResolveZodBody, type ResolveZodParams, type ResolveZodQuery, type ZodMiddlewareObject} from './validationTypes';
+import {type InferZodBody, type InferZodParams, type InferZodQuery, type ZodMiddlewareObject} from './validationTypes';
 
 export type ValidateOptions = {
 	/** Replace Request values with validated values */
@@ -25,7 +25,7 @@ export type ValidateOptions = {
 export function validateRequest<Z extends ZodMiddlewareObject>(
 	schema: Z,
 	{replace}: ValidateOptions = {replace: false},
-): RequestHandler<ResolveZodParams<Z>, any, ResolveZodBody<Z>, ResolveZodQuery<Z>> {
+): RequestHandler<InferZodParams<Z>, any, InferZodBody<Z>, InferZodQuery<Z>> {
 	const validationObject = z.object({
 		body: schema.body ?? z.any(),
 		params: schema.params ?? z.record(z.string(), z.any()),
@@ -38,14 +38,14 @@ export function validateRequest<Z extends ZodMiddlewareObject>(
 		} else {
 			if (replace) {
 				if (schema.body) {
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					req.body = status.data.body;
+					req.body = status.data.body as InferZodBody<Z>;
 				}
 				if (schema.params) {
-					req.params = status.data.params as ResolveZodParams<Z>;
+					req.params = status.data.params as InferZodParams<Z>;
 				}
 				if (schema.query) {
-					req.query = status.data.query;
+					// patch values to current query object (instance)
+					Object.assign(req.query, status.data.query as InferZodQuery<Z>);
 				}
 			}
 			next();

@@ -1,6 +1,6 @@
 import type {Request, RequestHandler} from 'express';
 import type {ParamsDictionary} from 'express-serve-static-core';
-import type {ParsedQs} from 'qs';
+import {type ParsedQs} from 'qs';
 import {type z} from 'zod';
 
 type ZodSchemaBodyType = z.ZodTypeAny;
@@ -110,6 +110,29 @@ export type ZodInferRequest<T extends ZodMiddlewareObject, ResBody = any, Locals
 /**
  * Express Resolvers for ZodMiddlewareObject
  */
+
+/**
+ * @deprecated going to be removed, use `InferZodParams` instead.
+ */
 export type ResolveZodParams<Z extends ZodMiddlewareObject> = Z['params'] extends ZodSchemaParamsType ? z.infer<Z['params']> : ParamsDictionary;
+/**
+ * @deprecated going to be removed, use `InferZodBody` instead.
+ */
 export type ResolveZodBody<Z extends ZodMiddlewareObject> = Z['body'] extends ZodSchemaBodyType ? z.infer<Z['body']> : unknown;
+/**
+ * @deprecated going to be removed, use `InferZodQuery` instead.
+ */
 export type ResolveZodQuery<Z extends ZodMiddlewareObject> = Z['query'] extends ZodSchemaQueryType ? z.infer<Z['query']> : ParsedQs;
+
+/**
+ * Infer Params type from ZodMiddlewareObject.
+ */
+export type InferZodParams<Z extends ZodMiddlewareObject> = Z['params'] extends ZodSchemaParamsType ? z.infer<Z['params']> : ParamsDictionary;
+/**
+ * Infer Body type from ZodMiddlewareObject.
+ */
+export type InferZodBody<Z extends ZodMiddlewareObject> = Z['body'] extends ZodSchemaBodyType ? z.infer<Z['body']> : unknown;
+/**
+ * Infer Query type from ZodMiddlewareObject.
+ */
+export type InferZodQuery<Z extends ZodMiddlewareObject> = Z['query'] extends ZodSchemaQueryType ? z.infer<Z['query']> : ParsedQs;

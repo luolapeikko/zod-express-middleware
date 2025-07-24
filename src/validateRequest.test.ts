@@ -6,23 +6,23 @@ import {validateRequest, type ZodMiddlewareObject} from '.';
 const headers = {'Content-Type': 'application/json'};
 const url = 'http://localhost:8936';
 
-enum NativeEnum {
-	TRUE = 'true',
-	FALSE = 'false',
-}
+const NativeEnum = {
+	TRUE: 'true',
+	FALSE: 'false',
+} as const;
 
 const sub1ValueSchema = z.enum(['sub1_1', 'sub1_2']).brand('Sub1Brand');
 const sub2ValueSchema = z.enum(['sub2_1', 'sub2_2']).brand('Sub2Brand');
 const allSubValueSchema = z.union([sub1ValueSchema, sub2ValueSchema]);
 const allSubValueBrandSchema = z.union([sub1ValueSchema, sub2ValueSchema]).brand('AllSubBrand');
 
-export type UUID = `${string}-${string}-${string}-${string}-${string}`;
+type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
-export function isUUID(value: string): value is UUID {
+function isUUID(value: string): value is UUID {
 	return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-export const uuidSchema = z.string().refine<UUID>(isUUID).brand('uuid');
+const uuidSchema = z.string().refine<UUID>(isUUID).brand('uuid');
 
 const stringBody = {
 	body: z.string(),
@@ -36,44 +36,46 @@ const objectBody = {
 
 const queryParams = {
 	query: z.object({
-		id: z.string(),
+		bliteral: z.literal('test').brand('test').optional(),
 		brand: z.string().brand('brand').optional(),
+		bunion: allSubValueBrandSchema.optional(),
 		enum: z.enum(['true', 'false']).optional(),
+		id: z.string(),
+		literal: z.literal('test').optional(),
 		nenum: z.nativeEnum(NativeEnum).optional(),
 		refine: z
 			.string()
 			.refine<'true'>((v) => v === 'true')
 			.optional(),
-		uuidSchema: uuidSchema.optional(),
 		sub1: sub1ValueSchema.optional(),
 		union: allSubValueSchema.optional(),
-		bunion: allSubValueBrandSchema.optional(),
-		literal: z.literal('test').optional(),
-		bliteral: z.literal('test').brand('test').optional(),
+		uuidSchema: uuidSchema.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
 const paramParams = {
 	params: z.object({
-		id: z.string(),
+		bliteral: z.literal('test').brand('test').optional(),
 		brand: z.string().brand('brand').optional(),
+		bunion: allSubValueBrandSchema.optional(),
 		enum: z.enum(['true', 'false']).optional(),
+		id: z.string(),
+		literal: z.literal('test').optional(),
 		nenum: z.nativeEnum(NativeEnum).optional(),
 		refine: z
 			.string()
 			.refine<'true'>((v) => v === 'true')
 			.optional(),
-		uuidSchema: uuidSchema.optional(),
 		sub1: sub1ValueSchema.optional(),
 		union: allSubValueSchema.optional(),
-		bunion: allSubValueBrandSchema.optional(),
-		literal: z.literal('test').optional(),
-		bliteral: z.literal('test').brand('test').optional(),
+		uuidSchema: uuidSchema.optional(),
 	}),
 } satisfies ZodMiddlewareObject;
 
 async function expectRes(path: string, init: RequestInit, status: number, text: string) {
-	const res = await fetch(`${url}/${path}`, init);
+	const asd = new URL(`${url}/${path}`);
+	console.log(asd.toString());
+	const res = await fetch(asd, init);
 	expect(await res.text()).toBe(text);
 	expect(res.status).toBe(status);
 }
@@ -81,12 +83,19 @@ async function expectRes(path: string, init: RequestInit, status: number, text: 
 describe('zodErrorToString', function () {
 	beforeAll(async () => {
 		const app = await startExpress(8936);
+
 		app.post('/string', validateRequest(stringBody), okResponseHandler);
 		app.post('/object', validateRequest(objectBody), okResponseHandler);
 		app.post('/query', validateRequest(queryParams), okResponseHandler);
 		app.post('/param', validateRequest(paramParams), okResponseHandler);
 		app.post('/param/:id', validateRequest(paramParams), okResponseHandler);
-		app.post('/param/:id', validateRequest(paramParams), okResponseHandler);
+
+		app.post('/rstring', validateRequest(stringBody, {replace: true}), okResponseHandler);
+		app.post('/robject', validateRequest(objectBody, {replace: true}), okResponseHandler);
+		app.post('/rquery', validateRequest(queryParams, {replace: true}), okResponseHandler);
+		app.post('/rparam', validateRequest(paramParams, {replace: true}), okResponseHandler);
+		app.post('/rparam/:id', validateRequest(paramParams, {replace: true}), okResponseHandler);
+
 		app.use(errorMiddleWare);
 	});
 	describe('errors', function () {
@@ -110,8 +119,17 @@ describe('zodErrorToString', function () {
 		it('should valid response for query', async function () {
 			await expectRes('query?id=data', {method: 'POST', body: null, headers}, 200, `OK`);
 		});
-		it('should valid response for query', async function () {
+		it('should valid response for param', async function () {
 			await expectRes('param/data', {method: 'POST', body: null, headers}, 200, `OK`);
+		});
+		it('should valid response for object replace', async function () {
+			await expectRes('robject', {method: 'POST', body: JSON.stringify({data: 'data'}), headers}, 200, `OK`);
+		});
+		it('should valid response for query replace', async function () {
+			await expectRes('rquery?id=data', {method: 'POST', body: null, headers}, 200, `OK`);
+		});
+		it('should valid response for param replace', async function () {
+			await expectRes('rparam/data', {method: 'POST', body: null, headers}, 200, `OK`);
 		});
 	});
 	afterAll(async () => {
