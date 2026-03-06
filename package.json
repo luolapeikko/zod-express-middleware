@@ -1,6 +1,6 @@
 {
   "name": "@luolapeikko/zod-express-middleware",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "ExpressJS Zod Validation Middleware",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
