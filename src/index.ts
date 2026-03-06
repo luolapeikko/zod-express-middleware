@@ -1,2 +1,2 @@
-export * from './validationTypes';
 export * from './validateRequest';
+export * from './validationTypes';

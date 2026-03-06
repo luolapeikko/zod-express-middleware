@@ -1,7 +1,7 @@
 import {afterAll, beforeAll, describe, expect, it} from 'vitest';
 import {z} from 'zod';
-import {errorMiddleWare, okResponseHandler, startExpress, stopExpress} from './expressHelpers';
 import {validateRequest, type ZodMiddlewareObject} from '.';
+import {errorMiddleWare, okResponseHandler, startExpress, stopExpress} from './expressHelpers';
 
 const headers = {'Content-Type': 'application/json'};
 const url = 'http://localhost:8936';
@@ -22,7 +22,7 @@ function isUUID(value: string): value is UUID {
 	return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-const uuidSchema = z.string().refine<UUID>(isUUID).brand('uuid');
+const uuidSchema = z.string().refine(isUUID).brand('uuid');
 
 const stringBody = {
 	body: z.string(),
@@ -45,7 +45,7 @@ const queryParams = {
 		nenum: z.nativeEnum(NativeEnum).optional(),
 		refine: z
 			.string()
-			.refine<'true'>((v) => v === 'true')
+			.refine((v): v is 'true' => v === 'true')
 			.optional(),
 		sub1: sub1ValueSchema.optional(),
 		union: allSubValueSchema.optional(),
@@ -64,7 +64,7 @@ const paramParams = {
 		nenum: z.nativeEnum(NativeEnum).optional(),
 		refine: z
 			.string()
-			.refine<'true'>((v) => v === 'true')
+			.refine((v) => v === 'true')
 			.optional(),
 		sub1: sub1ValueSchema.optional(),
 		union: allSubValueSchema.optional(),
@@ -74,7 +74,6 @@ const paramParams = {
 
 async function expectRes(path: string, init: RequestInit, status: number, text: string) {
 	const asd = new URL(`${url}/${path}`);
-	console.log(asd.toString());
 	const res = await fetch(asd, init);
 	expect(await res.text()).toBe(text);
 	expect(res.status).toBe(status);
@@ -100,16 +99,16 @@ describe('zodErrorToString', function () {
 	});
 	describe('errors', function () {
 		it('should have error from string validation', async function () {
-			await expectRes('string', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'body' Expected string, received object`);
+			await expectRes('string', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'body' Invalid input: expected string, received object`);
 		});
 		it('should build error from object validation', async function () {
-			await expectRes('object', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'body.data' Required`);
+			await expectRes('object', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'body.data' Invalid input: expected string, received undefined`);
 		});
 		it('should build error from query validation', async function () {
-			await expectRes('query', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'query.id' Required`);
+			await expectRes('query', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'query.id' Invalid input: expected string, received undefined`);
 		});
 		it('should build error from param validation', async function () {
-			await expectRes('param', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'params.id' Required`);
+			await expectRes('param', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'params.id' Invalid input: expected string, received undefined`);
 		});
 	});
 	describe('validated', function () {

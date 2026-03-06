@@ -1,50 +1,35 @@
+import type {StandardSchemaV1} from '@standard-schema/spec';
 import type {Request, RequestHandler} from 'express';
-import type {ParamsDictionary} from 'express-serve-static-core';
-import {type ParsedQs} from 'qs';
-import {type z} from 'zod';
+import type {ParamsDictionary, Query} from 'express-serve-static-core';
 
-type ZodSchemaBodyType = z.ZodTypeAny;
+/** Base type for Standard Schema Body */
+type StandardSchemaBodyType<T = unknown> = StandardSchemaV1<unknown, T>;
 
-type StrEnumLike = {
-	[x: string]: string;
-};
+/** Base type for Standard Schema Params */
+type StandardSchemaParamsType<T extends ParamsDictionary = ParamsDictionary> = StandardSchemaV1<ParamsDictionary, T>;
+
+/** Base type for Standard Schema Query params */
+type StandardSchemaQueryType<T extends Query = Query> = StandardSchemaV1<Query, T>;
+
+/** Infer output type from StandardSchemaV1 */
+type StandardOutputInfer<T> = T extends StandardSchemaV1<infer _, infer U> ? U : never;
 
 /**
- * used as "root" effect type on Params and Query types (effect need to produce string output).
- * @example
- * const test: ZodStringEffect = z.date().transform((date) => date.getTime()).transform((time) => time.toString());
+ * Infer Params type from ZodMiddlewareObject.
  */
-type ZodStringEffect<T extends string = string> = z.ZodEffects<z.ZodTypeAny, T, any>;
+export type InferZodParams<Z extends ZodMiddlewareObject> = Z['params'] extends StandardSchemaParamsType ? StandardOutputInfer<Z['params']> : ParamsDictionary;
+/**
+ * Infer Body type from ZodMiddlewareObject.
+ */
+export type InferZodBody<Z extends ZodMiddlewareObject> = Z['body'] extends StandardSchemaBodyType ? StandardOutputInfer<Z['body']> : unknown;
+/**
+ * Infer Query type from ZodMiddlewareObject.
+ */
+export type InferZodQuery<Z extends ZodMiddlewareObject> = Z['query'] extends StandardSchemaQueryType ? StandardOutputInfer<Z['query']> : Query;
 
-type AnyZodString<T extends string = string> = z.ZodString | z.ZodLiteral<T> | z.ZodBranded<AnyZodString<T>, any> | ZodStringEffect<T>;
-
-type AnyEnum<T extends string> = z.ZodEnum<[T, ...T[]]> | z.ZodBranded<AnyEnum<T>, any>;
-
-type ZodStringBased<T extends string | StrEnumLike> = T extends string ? AnyZodString<T> | AnyEnum<T> : never;
-
-type AnyStringBasedUnion<T extends string> = z.ZodUnion<[ZodStringBased<T>, ...ZodStringBased<T>[]]> | z.ZodBranded<AnyStringBasedUnion<T>, any>;
-
-type ZodNativeStrEnum<T extends string | StrEnumLike> = T extends StrEnumLike ? z.ZodType<T[keyof T], z.ZodNativeEnumDef<T>, T[keyof T]> : never;
-
-type ParamsBaseType<T extends string | StrEnumLike = string | StrEnumLike> = T extends StrEnumLike
-	? ZodStringBased<T> | ZodNativeStrEnum<T>
-	: T extends string
-		? ZodNativeStrEnum<T> | ZodStringBased<T> | AnyStringBasedUnion<T>
-		: never;
-type ZodSchemaParamsType<T extends string | StrEnumLike = string | StrEnumLike> = z.ZodObject<
-	Record<string, ParamsBaseType<T> | z.ZodOptional<ParamsBaseType<T>>>
->;
-
-type ValidQueryBaseType<T extends string | StrEnumLike = string | StrEnumLike> = T extends StrEnumLike
-	? ZodNativeStrEnum<T>
-	: T extends string
-		? ZodStringBased<T> | AnyStringBasedUnion<T>
-		: never;
-type ZodSchemaQueryType = z.ZodObject<Record<string, ValidQueryBaseType | z.ZodOptional<ValidQueryBaseType>>>;
-
-export type ZodParamsType<T extends ZodSchemaParamsType | undefined> = T extends ZodSchemaParamsType ? z.infer<T> : ParamsDictionary;
-export type ZodBodyType<T extends ZodSchemaBodyType | undefined> = T extends ZodSchemaBodyType ? z.infer<T> : unknown;
-export type ZodQueryType<T extends ZodSchemaQueryType | undefined> = T extends ZodSchemaQueryType ? z.infer<T> : ParsedQs;
+export type ZodParamsType<T extends StandardSchemaParamsType | undefined> = T extends StandardSchemaParamsType ? StandardOutputInfer<T> : ParamsDictionary;
+export type ZodBodyType<T extends StandardSchemaBodyType | undefined> = T extends StandardSchemaBodyType ? StandardOutputInfer<T> : unknown;
+export type ZodQueryType<T extends StandardSchemaQueryType | undefined> = T extends StandardSchemaQueryType ? StandardOutputInfer<T> : Query;
 
 /**
  * Validate schema for ExpressJS request
@@ -56,9 +41,9 @@ export type ZodQueryType<T extends ZodSchemaQueryType | undefined> = T extends Z
  * } satisfies ZodMiddlewareObject;
  */
 export type ZodMiddlewareObject = {
-	body?: ZodSchemaBodyType;
-	params?: ZodSchemaParamsType;
-	query?: ZodSchemaQueryType;
+	body?: StandardSchemaBodyType;
+	params?: StandardSchemaParamsType;
+	query?: StandardSchemaQueryType;
 };
 
 /**
@@ -106,33 +91,3 @@ export type ZodInferRequest<T extends ZodMiddlewareObject, ResBody = any, Locals
 	ZodQueryType<T['query']>,
 	Locals
 >;
-
-/**
- * Express Resolvers for ZodMiddlewareObject
- */
-
-/**
- * @deprecated going to be removed, use `InferZodParams` instead.
- */
-export type ResolveZodParams<Z extends ZodMiddlewareObject> = Z['params'] extends ZodSchemaParamsType ? z.infer<Z['params']> : ParamsDictionary;
-/**
- * @deprecated going to be removed, use `InferZodBody` instead.
- */
-export type ResolveZodBody<Z extends ZodMiddlewareObject> = Z['body'] extends ZodSchemaBodyType ? z.infer<Z['body']> : unknown;
-/**
- * @deprecated going to be removed, use `InferZodQuery` instead.
- */
-export type ResolveZodQuery<Z extends ZodMiddlewareObject> = Z['query'] extends ZodSchemaQueryType ? z.infer<Z['query']> : ParsedQs;
-
-/**
- * Infer Params type from ZodMiddlewareObject.
- */
-export type InferZodParams<Z extends ZodMiddlewareObject> = Z['params'] extends ZodSchemaParamsType ? z.infer<Z['params']> : ParamsDictionary;
-/**
- * Infer Body type from ZodMiddlewareObject.
- */
-export type InferZodBody<Z extends ZodMiddlewareObject> = Z['body'] extends ZodSchemaBodyType ? z.infer<Z['body']> : unknown;
-/**
- * Infer Query type from ZodMiddlewareObject.
- */
-export type InferZodQuery<Z extends ZodMiddlewareObject> = Z['query'] extends ZodSchemaQueryType ? z.infer<Z['query']> : ParsedQs;

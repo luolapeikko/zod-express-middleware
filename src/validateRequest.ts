@@ -1,6 +1,6 @@
-import {type RequestHandler} from 'express';
+import type {RequestHandler} from 'express';
 import {z} from 'zod';
-import {type InferZodBody, type InferZodParams, type InferZodQuery, type ZodMiddlewareObject} from './validationTypes';
+import type {InferZodBody, InferZodParams, InferZodQuery, ZodMiddlewareObject} from './validationTypes';
 
 export type ValidateOptions = {
 	/** Replace Request values with validated values */
@@ -33,22 +33,18 @@ export function validateRequest<Z extends ZodMiddlewareObject>(
 	});
 	return function (req, _res, next) {
 		const status = validationObject.safeParse(req);
-		if (!status.success) {
-			next(status.error);
-		} else {
-			if (replace) {
-				if (schema.body) {
-					req.body = status.data.body as InferZodBody<Z>;
-				}
-				if (schema.params) {
-					req.params = status.data.params as InferZodParams<Z>;
-				}
-				if (schema.query) {
-					// patch values to current query object (instance)
-					Object.assign(req.query, status.data.query as InferZodQuery<Z>);
-				}
+		if (replace && status.success) {
+			if (schema.body) {
+				req.body = status.data.body as InferZodBody<Z>;
 			}
-			next();
+			if (schema.params) {
+				req.params = status.data.params as InferZodParams<Z>;
+			}
+			if (schema.query) {
+				// patch values to current query object (instance)
+				Object.assign(req.query, status.data.query as InferZodQuery<Z>);
+			}
 		}
+		next(status.error);
 	};
 }
