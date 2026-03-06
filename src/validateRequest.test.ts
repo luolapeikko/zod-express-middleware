@@ -99,16 +99,36 @@ describe('zodErrorToString', function () {
 	});
 	describe('errors', function () {
 		it('should have error from string validation', async function () {
-			await expectRes('string', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'body' Invalid input: expected string, received object`);
+			await expectRes(
+				'string',
+				{method: 'POST', body: JSON.stringify({}), headers},
+				400,
+				`ZodMiddlewareError:path 'body' Invalid input: expected string, received object`,
+			);
 		});
 		it('should build error from object validation', async function () {
-			await expectRes('object', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'body.data' Invalid input: expected string, received undefined`);
+			await expectRes(
+				'object',
+				{method: 'POST', body: JSON.stringify({}), headers},
+				400,
+				`ZodMiddlewareError:path 'body.data' Invalid input: expected string, received undefined`,
+			);
 		});
 		it('should build error from query validation', async function () {
-			await expectRes('query', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'query.id' Invalid input: expected string, received undefined`);
+			await expectRes(
+				'query',
+				{method: 'POST', body: JSON.stringify({}), headers},
+				400,
+				`ZodMiddlewareError:path 'query.id' Invalid input: expected string, received undefined`,
+			);
 		});
 		it('should build error from param validation', async function () {
-			await expectRes('param', {method: 'POST', body: JSON.stringify({}), headers}, 400, `ZodMiddlewareError:path 'params.id' Invalid input: expected string, received undefined`);
+			await expectRes(
+				'param',
+				{method: 'POST', body: JSON.stringify({}), headers},
+				400,
+				`ZodMiddlewareError:path 'params.id' Invalid input: expected string, received undefined`,
+			);
 		});
 	});
 	describe('validated', function () {
