@@ -1,18 +1,13 @@
-/// <reference types="vitest" />
-
 import {defineConfig} from 'vitest/config';
 
 export default defineConfig({
 	test: {
-		reporters: process.env.GITHUB_ACTIONS ? ['github-actions', 'junit'] : ['verbose', 'github-actions', 'junit'],
-		outputFile: {
-			junit: './test-results.xml',
-		},
+		reporters: ['github-actions', 'minimal'],
 		coverage: {
 			provider: 'v8',
 			include: ['src/**/*.ts'],
 			exclude: ['src/expressHelpers.ts', '**/*.test.ts'],
-			reporter: ['text'],
+			reporter: ['text', 'lcovonly'],
 		},
 		include: ['**/*.test.ts'],
 		typecheck: {
